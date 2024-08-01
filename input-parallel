@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            input {
+                message "can i proceed with this?"
+            }
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage ("new build") {
+            parallel {
+                stage ("new job") {
+                    steps {
+                        build job: "job-2"
+                    }
+                }
+            }
+        }
+        stage('Hllo') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}
