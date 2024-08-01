@@ -1,0 +1,26 @@
+pipeline {
+    agent {
+        label 'dev'
+    }
+
+    stages {
+        stage('Code') {
+            steps {
+                git "https://github.com/Venkat310502-msd/one.git"
+            }
+        }
+        stage ("build") {
+            steps {
+               sh "mvn clean package"
+            }
+        }
+        stage ("deploy") {
+            input {
+                message "shall i proceed to deploy??? "
+            }
+            steps {
+                deploy adapters: [tomcat9(credentialsId: 'venkat2', path: '', url: 'http://52.90.32.67:8080')], contextPath: 'venkat', war: 'target/*.war'
+            }
+        }
+    }
+}
