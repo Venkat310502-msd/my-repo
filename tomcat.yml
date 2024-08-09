@@ -1,0 +1,29 @@
+---
+- hosts: all
+  connection: ssh
+
+  tasks:
+    - name: installing java dependency
+      command: amazon-linux-extras install java-openjdk11 -y
+
+    - name: downloading the tar file from dldcn website.
+      get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz"
+        dest: "/root"
+
+    - name: untar the downloaded file
+      command: tar -zxvf apache-tomcat-9.0.93.tar.gz
+
+    - name: modify the files context.xml 
+      copy:
+        src: "/root/apache-tomcat-9.0.93/webapps/manager/META-INF/context.xml"
+        dest: "/root/apache-tomcat-9.0.93/webapps/manager/META-INF/"
+    - name: modfying tomcat-users.xml
+      copy:
+        src: "/root/apache-tomcat-9.0.93/conf/tomcat-users.xml"
+        dest: "/root/apache-tomcat-9.0.93/conf/"
+
+    - name: start the tomact service
+      shell: nohup /root/apache-tomcat-9.0.93/bin/startup.sh
+
+

@@ -1,0 +1,12 @@
+---
+- hosts: all
+  connection: ssh
+
+  tasks:
+    - name: copying a file
+      copy:
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+      with_items:
+        - { src: "task2.yml", dest: "/root"}
+        - { src: "jenkins.yml", dest: "/root"}

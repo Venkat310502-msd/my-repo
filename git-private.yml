@@ -1,0 +1,17 @@
+---
+- hosts: all
+  connection: ssh
+
+  tasks:
+    - name: git installation
+      yum : name=git state=present
+    - name: to chcek git version
+      command: git -v
+      register: abc
+    - debug:
+        msg: "git version is {{abc.stdout}}"
+    - name: git cloning
+      git:
+        repo: "https://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@github.com/Venkat310502-msd/my-repo.git"
+        dest: "/root/git"
+        version: master

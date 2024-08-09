@@ -1,0 +1,12 @@
+---
+- hosts: all
+  connection: ssh
+
+  tasks:
+    - name: git installation
+      yum : name=git state=present
+    - name: git cloning
+      git:
+        repo: "https://github.com/Venkat310502-msd/my-repo.git"
+        dest: "/root/git"
+        version: master

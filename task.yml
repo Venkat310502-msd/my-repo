@@ -1,0 +1,16 @@
+---
+- hosts : all
+  connection : ssh
+
+  tasks:
+    - name: creating a file with some permissions and owners
+      file :
+        path : "/opt/anil"
+        state : touch
+        mode : 777
+        owner : ec2-user
+        group : ec2-user
+      tags: "abc"
+    - name: service restart    
+      service: name=httpd state=started
+...

@@ -1,0 +1,12 @@
+---
+- hosts : all
+  connection : ssh
+
+  tasks :
+    - name : hello
+      yum : name=tree  state=absent
+      notify : Restart the HTTPD
+        
+  handlers :
+    - name : Restart the HTTPD
+      service : name=httpd state=started

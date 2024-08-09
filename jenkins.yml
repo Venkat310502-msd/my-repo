@@ -1,0 +1,22 @@
+---
+- hosts : all
+  connection : ssh
+  
+  tasks:
+    - name: installing java dependency.
+      command : amazon-linux-extras install java-openjdk11 -y
+    - name: downloading the data from internet
+      get_url :
+        url: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+        dest : "/etc/yum.repos.d/jenkins.repo"
+    - name : to get key from jenkins
+      ansible.builtin.rpm_key :
+        key: "https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key"
+        state: present
+
+    - name : install jenkins
+      yum : name=jenkins state=present
+
+    - name : start jenkins
+      service : name=jenkins state=started
+

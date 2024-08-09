@@ -1,0 +1,13 @@
+---
+- hosts : all
+  connection : ssh
+  
+  vars :
+    xyz : git
+    abc : maven
+  tasks :
+    - name : inserting variables
+      yum : name={{xyz }} state=present
+      yum : name={{abc}} state=present
+
+...
