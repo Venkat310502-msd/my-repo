@@ -1,0 +1,14 @@
+FROM ubuntu
+MAINTAINER venkat
+LABEL my first docker file
+COPY . venkat.xml
+RUN touch venkat anil dheeraj
+RUN apt update -y
+RUN apt install git -y
+ENV abc=linux
+ARG efg=administartor
+RUN echo " hello iam $abc system $efg"
+WORKDIR /myapp
+ADD https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz /
+RUN touch hello
+RUN echo "hello world , iam new to Docker">/myapp/hello
