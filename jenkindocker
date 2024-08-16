@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Venkat310502-msd/Dockerdummy.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "docker build -t $image ."
+            }
+        }
+        stage('Container') {
+            steps {
+                sh "docker run -itd --name $container -p $HP:$port $image"
+            }
+        }
+    }
+}
