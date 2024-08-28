@@ -1,1 +1,71 @@
-
+pipeline {
+    agent any
+    tools {
+        jdk "java"
+        nodejs "NodeJS"
+    }
+    environment {
+        SCANNER_HOME=tool "Mysonar"
+    }
+    stages {
+        stage ("Clean WS") {
+            steps {
+                cleanWs()
+            }
+        }
+        stage ("Code") {
+            steps {
+                git "https://github.com/Venkat310502-msd/Zomato-Project.git"
+            }
+        }
+        stage ("QCA") {
+            steps {
+                withSonarQubeEnv("Mysonar") {
+                    sh """$SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectName=zomato \
+                    -Dsonar.projectKey=zomato"""
+                }
+            }
+        }
+        stage ("Install Nodejs") {
+            steps {
+                sh "npm install"
+            }
+        }
+        stage ("dpcheck") {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        stage ("Build image") {
+            steps {
+                sh "docker build -t venkat537/zomato:dockerproject ."
+            }
+        }
+        stage ("Trivy") {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+            }
+        }
+        stage ("Docker push") {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'DockerhubID') {
+                        sh "docker push venkat537/zomato:dockerproject"
+                    }
+                }
+            }
+        }
+        stage ("Scan image") {
+            steps {
+                sh "trivy image venkat537/zomato:dockerproject"
+            }
+        }
+        stage ("Container Deploy") {
+            steps {
+                sh "docker run -itd --name cont1 -p 9008:3000 venkat537/zomato:dockerproject"
+            }
+        }
+    }
+}
