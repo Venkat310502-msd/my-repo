@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+    tools {
+        jdk "jdk17"
+        nodejs "nodejs"
+    }
+    environment {
+        SCANNER_HOME = "${tool 'mysonar'}"
+    }
+    stages {
+        stage("Clean WS") {
+            steps {
+                cleanWs()
+            }
+        }
+        stage("Code") {
+            steps {
+                git "https://github.com/Venkat310502-msd/k8s-project.git"
+            }
+        }
+        stage("QCA") {
+            steps {
+                withSonarQubeEnv("mysonar") {
+                    sh """$SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectName=game \
+                    -Dsonar.projectKey=game"""
+                }
+            }
+        }
+        stage("Install Nodejs") {
+            steps {
+                sh "npm install"
+            }
+        }
+        stage("dpcheck") {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'dp-check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        stage("Build image") {
+            steps {
+                sh "docker build -t venkat537/myapp:k8sprojectv2 Tetris-V2"
+            }
+        }
+        stage("Trivy") {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+            }
+        }
+        stage("Docker push") {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'DockerhubID') {
+                        sh "docker push venkat537/myapp:k8sprojectv2"
+                    }
+                }
+            }
+        }
+        stage("Scan image") {
+            steps {
+                sh "trivy image venkat537/myapp:k8sprojectv2"
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Slack Notifications'
+            slackSend (
+                channel: 'k8s-project', // change your channel name
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: """*${currentBuild.currentResult}:* Job ${env.JOB_NAME} 
+                build ${env.BUILD_NUMBER} 
+                More info at: ${env.BUILD_URL}"""
+            )
+        }
+    }
+}
